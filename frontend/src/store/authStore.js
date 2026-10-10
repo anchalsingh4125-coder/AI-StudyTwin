@@ -14,7 +14,8 @@ export const useAuthStore = create((set) => ({
       set({ user: res.data?.user ?? res.user, isAuthenticated: true, isLoading: false });
       return res.data?.user ?? res.user;
     } catch (err) {
-      set({ user: null, isAuthenticated: false, isLoading: false, error: null });
+        console.error('CHECK AUTH ERROR:', err.response?.data || err.message || err);
+        set({ user: null, isAuthenticated: false, isLoading: false, error: err.message });
       return null;
     }
   },
@@ -57,5 +58,6 @@ export const useAuthStore = create((set) => ({
 }));
 
 export default useAuthStore;
+
 
 
