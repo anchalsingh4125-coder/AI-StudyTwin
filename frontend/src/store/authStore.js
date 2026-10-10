@@ -3,16 +3,16 @@ import authService from '../services/auth.service.js';
 
 export const useAuthStore = create((set) => ({
   user: null,
-  isAuthenticated: false,
-  isLoading: true,
+    isAuthenticated: false,
+    isLoading: false,
   error: null,
 
   checkAuth: async () => {
     try {
       set({ isLoading: true, error: null });
       const res = await authService.getMe();
-      set({ user: res.user, isAuthenticated: true, isLoading: false });
-      return res.user;
+      set({ user: res.data?.user ?? res.user, isAuthenticated: true, isLoading: false });
+      return res.data?.user ?? res.user;
     } catch (err) {
       set({ user: null, isAuthenticated: false, isLoading: false, error: null });
       return null;
@@ -23,7 +23,7 @@ export const useAuthStore = create((set) => ({
     try {
       set({ isLoading: true, error: null });
       const res = await authService.login(credentials);
-      set({ user: res.user, isAuthenticated: true, isLoading: false });
+      set({ user: res.data?.user ?? res.user, isAuthenticated: true, isLoading: false });
       return { success: true };
     } catch (err) {
       set({ isLoading: false, error: err.message });
@@ -35,7 +35,7 @@ export const useAuthStore = create((set) => ({
     try {
       set({ isLoading: true, error: null });
       const res = await authService.register(userData);
-      set({ user: res.user, isAuthenticated: true, isLoading: false });
+      set({ user: res.data?.user ?? res.user, isAuthenticated: true, isLoading: false });
       return { success: true };
     } catch (err) {
       set({ isLoading: false, error: err.message });
@@ -57,3 +57,5 @@ export const useAuthStore = create((set) => ({
 }));
 
 export default useAuthStore;
+
+
