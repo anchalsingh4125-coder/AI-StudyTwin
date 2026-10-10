@@ -3,19 +3,28 @@ import authService from '../services/auth.service.js';
 
 export const useAuthStore = create((set) => ({
   user: null,
-    isAuthenticated: false,
-    isLoading: false,
+  isAuthenticated: false,
+  isLoading: false,
   error: null,
 
   checkAuth: async () => {
     try {
       set({ isLoading: true, error: null });
+      const token = typeof window !== 'undefined' ? sessionStorage.getItem('authToken') : null;
+      if (!token) {
+        set({ user: null, isAuthenticated: false, isLoading: false, error: null });
+        return null;
+      }
+
       const res = await authService.getMe();
-      set({ user: res.data?.user ?? res.user, isAuthenticated: true, isLoading: false });
-      return res.data?.user ?? res.user;
+      const user = res.data?.user ?? res.user;
+      set({ user, isAuthenticated: true, isLoading: false, error: null });
+      return user;
     } catch (err) {
-        console.error('CHECK AUTH ERROR:', err.response?.data || err.message || err);
-        set({ user: null, isAuthenticated: false, isLoading: false, error: err.message });
+      if (typeof window !== 'undefined') {
+        sessionStorage.removeItem('authToken');
+      }
+      set({ user: null, isAuthenticated: false, isLoading: false, error: null });
       return null;
     }
   },
@@ -24,7 +33,12 @@ export const useAuthStore = create((set) => ({
     try {
       set({ isLoading: true, error: null });
       const res = await authService.login(credentials);
-      set({ user: res.data?.user ?? res.user, isAuthenticated: true, isLoading: false });
+      const user = res.data?.user ?? res.user;
+      const token = res.data?.token ?? res.token;
+      if (token && typeof window !== 'undefined') {
+        sessionStorage.setItem('authToken', token);
+      }
+      set({ user, isAuthenticated: true, isLoading: false, error: null });
       return { success: true };
     } catch (err) {
       set({ isLoading: false, error: err.message });
@@ -36,7 +50,12 @@ export const useAuthStore = create((set) => ({
     try {
       set({ isLoading: true, error: null });
       const res = await authService.register(userData);
-      set({ user: res.data?.user ?? res.user, isAuthenticated: true, isLoading: false });
+      const user = res.data?.user ?? res.user;
+      const token = res.data?.token ?? res.token;
+      if (token && typeof window !== 'undefined') {
+        sessionStorage.setItem('authToken', token);
+      }
+      set({ user, isAuthenticated: true, isLoading: false, error: null });
       return { success: true };
     } catch (err) {
       set({ isLoading: false, error: err.message });
@@ -50,6 +69,9 @@ export const useAuthStore = create((set) => ({
     } catch (err) {
       console.warn('Logout error:', err.message);
     } finally {
+      if (typeof window !== 'undefined') {
+        sessionStorage.removeItem('authToken');
+      }
       set({ user: null, isAuthenticated: false, isLoading: false, error: null });
     }
   },
@@ -58,6 +80,3 @@ export const useAuthStore = create((set) => ({
 }));
 
 export default useAuthStore;
-
-
-

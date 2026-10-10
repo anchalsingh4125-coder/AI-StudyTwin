@@ -53,6 +53,7 @@ export const register = async (req, res) => {
       message: 'User registered successfully.',
       data: {
         user,
+        token,
       },
     });
   } catch (error) {
@@ -109,6 +110,7 @@ export const login = async (req, res) => {
       message: 'Login successful.',
       data: {
         user,
+        token,
       },
     });
   } catch (error) {

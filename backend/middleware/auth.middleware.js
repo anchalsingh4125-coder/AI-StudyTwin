@@ -7,12 +7,12 @@ import User from '../models/user.model.js';
  */
 export const authenticateUser = async (req, res, next) => {
   try {
-    // Read JWT primarily from httpOnly cookie
-    let token = req.cookies?.token;
-
-    // Also support Authorization header Bearer token for API testing flexibility
-    if (!token && req.headers?.authorization?.startsWith('Bearer ')) {
+    // Read JWT from Authorization header (Bearer token) or httpOnly cookie
+    let token;
+    if (req.headers?.authorization?.startsWith('Bearer ')) {
       token = req.headers.authorization.split(' ')[1];
+    } else if (req.cookies?.token) {
+      token = req.cookies.token;
     }
 
     if (!token) {

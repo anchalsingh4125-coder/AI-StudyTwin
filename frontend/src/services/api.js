@@ -8,6 +8,20 @@ const api = axios.create({
   },
 });
 
+// Request interceptor to attach Bearer token from sessionStorage
+api.interceptors.request.use(
+  (config) => {
+    const token = typeof window !== 'undefined' ? sessionStorage.getItem('authToken') : null;
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
 // Response interceptor for consistent error normalization
 api.interceptors.response.use(
   (response) => response,
